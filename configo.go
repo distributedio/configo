@@ -228,14 +228,17 @@ func ApplyDefault(t *ast.Table, rv reflect.Value) error {
 				fv = fv.Elem()
 			}
 			if fv.Kind() == reflect.Struct {
-				subt := t.Fields[ft.Name].(*ast.Table)
+				var subt *ast.Table
+				if f := t.Fields[ft.Name]; f != nil {
+					subt = f.(*ast.Table)
+				}
 				if err := ApplyDefault(subt, fv); err != nil {
 					return err
 				}
 				continue
 			}
 			if isEmptyValue(fv) {
-				if !hasField(t, ft) {
+				if t == nil || !hasField(t, ft) {
 					if err := applyDefaultValue(fv, ft, rv); err != nil {
 						return err
 					}
