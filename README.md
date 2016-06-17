@@ -14,9 +14,27 @@ configo use [govalidate](https://github.com/asaskevich/govalidator) to validate 
 
 ## Example
 ```go
+package main
+
+import (
+        "fmt"
+
+        "github.com/shafreeck/configo"
+)
+
 //`cfg: "name, required or default value, validate, descripion"`
 type Config struct {
-    Listen string `cfg: "listen, required, netaddr, server listen address"`
-    MaxConns int `cfg: "max-conns, 1000, , max number of connections`
+        Listen   string `cfg:"listen, :8804, netaddr, server listen address"`
+        MaxConns int    `cfg:"maxconns, 1000, numeric, max number of connections"`
+}
+
+func main() {
+        data := []byte("")
+        v := &Config{}
+        if err := configo.Unmarshal(data, v); err != nil {
+                fmt.Println(err)
+                return
+        }
+        fmt.Println(v)
 }
 ```
