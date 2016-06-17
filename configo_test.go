@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Listen  string   `cfg:"listen, :8805, netaddr, listen address of server"`
 	Cluster []string `cfg:"cluster, ['127.0.0.1:8800'], dialstring"`
-	MaxConn int      `cfg:"max-conn, required, dialstring"`
+	MaxConn int      `cfg:"max-conn, required, numeric"`
 }
 
 func TestUnmarshal(t *testing.T) {
