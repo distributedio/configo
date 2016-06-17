@@ -11,9 +11,11 @@ configo use [govalidate](https://github.com/asaskevich/govalidator) to validate 
 * Configure parser behaviour using struct tags
 * Set default value or required
 * Validate value using govalidate(Validators with parameters will be supported soon)
-* Generate toml template basing on go struct and tags(TODO)
+* Generate toml template basing on go struct and tags
 
 ## Example
+
+### Unmarshal toml to config
 ```go
 package main
 
@@ -37,5 +39,37 @@ func main() {
                 return
         }
         fmt.Println(v)
+}
+```
+
+## Generate toml from struct
+```go
+package main
+
+import (
+        "fmt"
+
+        "github.com/shafreeck/configo"
+)
+
+type Config struct {
+        Listen string `cfg:"listen, :8805, netaddr, listen address of server"`
+        Redis  struct {
+                Cluster []string `cfg:"cluster, ['127.0.0.1:8800'], dialstring"`
+                Net     struct {
+                        Timeout int
+                }
+        }
+        MaxConn int `cfg:"max-conn, required, numeric"`
+}
+
+func main() {
+        c := &Config{}
+        if data, err := configo.Marshal(c); err != nil {
+                fmt.Println(err)
+                return
+        } else {
+                fmt.Printf("%s", data)
+        }
 }
 ```
