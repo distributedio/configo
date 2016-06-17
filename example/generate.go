@@ -7,14 +7,14 @@ import (
 )
 
 type Config struct {
-	Listen string `cfg:"listen, :8805, netaddr, listen address of server"`
-	Redis  struct {
+	Listen  string `cfg:"listen, :8805, netaddr, listen address of server"`
+	MaxConn int    `cfg:"max-conn, required, numeric"`
+	Redis   struct {
 		Cluster []string `cfg:"cluster, ['127.0.0.1:8800'], dialstring"`
 		Net     struct {
 			Timeout int
 		}
 	}
-	MaxConn int `cfg:"max-conn, required, numeric"`
 }
 
 func main() {

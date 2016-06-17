@@ -54,13 +54,13 @@ import (
 
 type Config struct {
         Listen string `cfg:"listen, :8805, netaddr, listen address of server"`
+        MaxConn int `cfg:"max-conn, required, numeric"`
         Redis  struct {
                 Cluster []string `cfg:"cluster, ['127.0.0.1:8800'], dialstring"`
                 Net     struct {
                         Timeout int
                 }
         }
-        MaxConn int `cfg:"max-conn, required, numeric"`
 }
 
 func main() {
@@ -82,6 +82,11 @@ Output
 #default:     :8805
 #listen=""
 
+#type:        int
+#rules:       numeric
+#required
+max-conn=0
+
 [redis]
 
 #type:        []string
@@ -93,9 +98,4 @@ Output
 
 #type:        int
 timeout=0
-
-#type:        int
-#rules:       numeric
-#required
-max-conn=0
 ```
