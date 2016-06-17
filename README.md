@@ -73,3 +73,29 @@ func main() {
         }
 }
 ```
+Output
+
+```toml
+#type:        string
+#rules:       netaddr
+#description: listen address of server
+#default:     :8805
+#listen=""
+
+[redis]
+
+#type:        []string
+#rules:       dialstring
+#default:     ['127.0.0.1:8800']
+#cluster=[]
+
+[redis.net]
+
+#type:        int
+timeout=0
+
+#type:        int
+#rules:       numeric
+#required
+max-conn=0
+```
