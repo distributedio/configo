@@ -265,3 +265,6 @@ func Unmarshal(data []byte, v interface{}) error {
 	}
 	return nil
 }
+func Marshal(v interface{}) ([]byte, error) {
+	return toml.Marshal(v)
+}
