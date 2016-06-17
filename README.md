@@ -23,7 +23,7 @@ import (
         "github.com/shafreeck/configo"
 )
 
-//`cfg: "name, required or default value, validate, descripion"`
+//`cfg:"name, required or default value, validate, descripion"`
 type Config struct {
         Listen   string `cfg:"listen, :8804, netaddr, server listen address"`
         MaxConns int    `cfg:"maxconns, 1000, numeric, max number of connections"`
