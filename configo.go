@@ -195,22 +195,25 @@ func toUnderscore(s string) string {
 	return string(result)
 }
 
-func hasField(t *ast.Table, field reflect.StructField) bool {
+func findField(t *ast.Table, field reflect.StructField) (interface{}, bool) {
+	if t == nil {
+		return nil, false
+	}
 	tag := extractTag(field.Tag.Get(fieldTagName))
 	if tag != nil && tag.Name != "" {
-		if _, found := t.Fields[tag.Name]; found {
-			return found
+		if f, found := t.Fields[tag.Name]; found {
+			return f, found
 		}
-		return false
+		return nil, false
 	}
 
 	name := field.Name
 	for _, n := range []string{name, strings.ToLower(name), toUnderscore(name)} {
-		if _, found := t.Fields[n]; found {
-			return found
+		if f, found := t.Fields[n]; found {
+			return f, found
 		}
 	}
-	return false
+	return nil, false
 }
 
 func ApplyDefault(t *ast.Table, rv reflect.Value) error {
@@ -229,7 +232,7 @@ func ApplyDefault(t *ast.Table, rv reflect.Value) error {
 			}
 			if fv.Kind() == reflect.Struct {
 				var subt *ast.Table
-				if f := t.Fields[ft.Name]; f != nil {
+				if f, found := findField(t, ft); found {
 					subt = f.(*ast.Table)
 				}
 				if err := ApplyDefault(subt, fv); err != nil {
@@ -238,7 +241,7 @@ func ApplyDefault(t *ast.Table, rv reflect.Value) error {
 				continue
 			}
 			if isEmptyValue(fv) {
-				if t == nil || !hasField(t, ft) {
+				if _, found := findField(t, ft); !found {
 					if err := applyDefaultValue(fv, ft, rv); err != nil {
 						return err
 					}
