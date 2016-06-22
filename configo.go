@@ -232,9 +232,20 @@ func ApplyDefault(t *ast.Table, rv reflect.Value) error {
 			}
 			if fv.Kind() == reflect.Struct {
 				var subt *ast.Table
+				var ok bool
 				if f, found := findField(t, ft); found {
-					subt = f.(*ast.Table)
+					subt, ok = f.(*ast.Table)
+					//Assgin t back to subt
+					//This is becuase the reflect.Struct is emmbed
+					// type D struct {
+					//    time.Duration
+					// }
+					// D is a struct , but there is no sub table in conf
+					if !ok {
+						subt = t
+					}
 				}
+
 				if err := ApplyDefault(subt, fv); err != nil {
 					return err
 				}
