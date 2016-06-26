@@ -5,7 +5,7 @@ Configo is a go library to parse toml configuration using struct tags
 [shafreeck/toml](https://github.com/shafreeck/toml) is a modification version of [naoina/toml](https://github.com/naoina/toml),
 adding the abililty to parse complex struct tags.
 
-## Validate
+## Validation
 configo use [govalidator](https://github.com/asaskevich/govalidator) to validate conf values
 
 ## Features
