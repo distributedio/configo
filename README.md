@@ -1,17 +1,19 @@
-# Configo is a go library to parse toml configuration using struct tags
+# Configo
+Configo is a go library to parse toml configuration using struct tags
 
 ## Toml
 [shafreeck/toml](https://github.com/shafreeck/toml) is a modification version of [naoina/toml](https://github.com/naoina/toml),
 adding the abililty to parse complex struct tags.
 
 ## Validate
-configo use [govalidate](https://github.com/asaskevich/govalidator) to validate conf values
+configo use [govalidator](https://github.com/asaskevich/govalidator) to validate conf values
 
 ## Features
 * Configure parser behaviour using struct tags
 * Set default value or required
-* Validate value using govalidate(Validators with parameters will be supported soon)
+* Validate value using govalidator(Validators with parameters will be supported soon)
 * Generate toml template basing on go struct and tags
+* Build generating tools using configo-build
 
 ## Example
 
@@ -43,36 +45,25 @@ func main() {
 ```
 
 ## Generate toml from struct
-```go
-package main
 
-import (
-        "fmt"
-
-        "github.com/shafreeck/configo"
-)
-
-type Config struct {
-        Listen string `cfg:"listen, :8805, netaddr, listen address of server"`
-        Redis  struct {
-                Cluster []string `cfg:"cluster, ['127.0.0.1:8800'], dialstring"`
-                Net     struct {
-                        Timeout int
-                }
-        }
-        MaxConn int `cfg:"max-conn, required, numeric"`
-}
-
-func main() {
-        c := &Config{}
-        if data, err := configo.Marshal(c); err != nil {
-                fmt.Println(err)
-                return
-        } else {
-                fmt.Printf("%s", data)
-        }
-}
+### First, install configo-build
 ```
+go get github.com/shafreeck/configo/bin/configo-build
+```
+
+### Second, build an executable program basing on your package and struct
+```
+configo-build <package>.<struct>
+```
+### Finally, use the built program to generate a toml
+```
+<built program> > conf.toml
+```
+and you can patch you toml file if it is already existed
+```
+<built program> -patch conf.toml
+```
+
 Output
 
 ```toml
