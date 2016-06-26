@@ -216,7 +216,7 @@ func findField(t *ast.Table, field reflect.StructField) (interface{}, bool) {
 	return nil, false
 }
 
-func ApplyDefault(t *ast.Table, rv reflect.Value) error {
+func applyDefault(t *ast.Table, rv reflect.Value) error {
 	for rv.Kind() == reflect.Ptr {
 		rv = rv.Elem()
 	}
@@ -246,7 +246,7 @@ func ApplyDefault(t *ast.Table, rv reflect.Value) error {
 					}
 				}
 
-				if err := ApplyDefault(subt, fv); err != nil {
+				if err := applyDefault(subt, fv); err != nil {
 					return err
 				}
 				continue
@@ -274,7 +274,7 @@ func Unmarshal(data []byte, v interface{}) error {
 		return err
 	}
 
-	if err := ApplyDefault(table, reflect.ValueOf(v)); err != nil {
+	if err := applyDefault(table, reflect.ValueOf(v)); err != nil {
 		return err
 	}
 	return nil
