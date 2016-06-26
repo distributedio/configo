@@ -289,3 +289,23 @@ func Marshal(v interface{}) ([]byte, error) {
 	}
 	return toml.Marshal(v)
 }
+
+//Patch the base using the value from v, the new bytes returned
+//combines the base's value and v's default value
+func Patch(base []byte, v interface{}) ([]byte, error) {
+	//unmarshal base
+	table, err := toml.Parse(base)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := toml.UnmarshalTable(table, v); err != nil {
+		return nil, err
+	}
+
+	if err := applyDefault(table, reflect.ValueOf(v), true); err != nil {
+		return nil, err
+	}
+
+	return Marshal(v)
+}
