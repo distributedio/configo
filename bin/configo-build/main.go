@@ -16,6 +16,7 @@ import(
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/shafreeck/configo"
 
@@ -38,7 +39,9 @@ func main() {
             fmt.Println(err)
             return
         } else {
-            fmt.Print(string(data))
+			if err := ioutil.WriteFile(base, data, os.ModePerm&0644); err != nil {
+				fmt.Println(err)
+			}
         }
         return
     }
