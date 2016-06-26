@@ -80,6 +80,8 @@ func main() {
 
 	out := strings.ToLower(st) + ".cfg"
 	cmd := exec.Command("go", "build", "-o", out, tmpFile)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
 	if err := cmd.Run(); err != nil {
 		log.Fatalln(err)
 	}
