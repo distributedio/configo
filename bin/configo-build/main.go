@@ -23,9 +23,9 @@ import(
 	"%s" // the config package
 )
 func main() {
-   base := ""
-   flag.StringVar(&base, "patch", "", "the base conf that to patch")
-   flag.Parse()
+    base := ""
+    flag.StringVar(&base, "patch", "", "the base conf that to patch")
+    flag.Parse()
 
     config := %s{} //the struct
 
