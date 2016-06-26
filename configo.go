@@ -112,11 +112,14 @@ func unmarshalArray(key, value string, v interface{}) error {
 	return nil
 }
 
-func applyDefaultValue(fv reflect.Value, ft reflect.StructField, rv reflect.Value) error {
+func applyDefaultValue(fv reflect.Value, ft reflect.StructField, rv reflect.Value, ignoreRequired bool) error {
 	tag := extractTag(ft.Tag.Get(fieldTagName))
 
 	//Default value is not supported
 	if tag.Value == "required" {
+		if ignoreRequired {
+			return nil
+		}
 		return fmt.Errorf("value of %q is required", ft.Name)
 	}
 
@@ -216,7 +219,7 @@ func findField(t *ast.Table, field reflect.StructField) (interface{}, bool) {
 	return nil, false
 }
 
-func applyDefault(t *ast.Table, rv reflect.Value) error {
+func applyDefault(t *ast.Table, rv reflect.Value, ignoreRequired bool) error {
 	for rv.Kind() == reflect.Ptr {
 		rv = rv.Elem()
 	}
@@ -246,14 +249,14 @@ func applyDefault(t *ast.Table, rv reflect.Value) error {
 					}
 				}
 
-				if err := applyDefault(subt, fv); err != nil {
+				if err := applyDefault(subt, fv, ignoreRequired); err != nil {
 					return err
 				}
 				continue
 			}
 			if isEmptyValue(fv) {
 				if _, found := findField(t, ft); !found {
-					if err := applyDefaultValue(fv, ft, rv); err != nil {
+					if err := applyDefaultValue(fv, ft, rv, ignoreRequired); err != nil {
 						return err
 					}
 				}
@@ -274,11 +277,15 @@ func Unmarshal(data []byte, v interface{}) error {
 		return err
 	}
 
-	if err := applyDefault(table, reflect.ValueOf(v)); err != nil {
+	if err := applyDefault(table, reflect.ValueOf(v), false); err != nil {
 		return err
 	}
 	return nil
 }
 func Marshal(v interface{}) ([]byte, error) {
+	rv := reflect.ValueOf(v)
+	if err := applyDefault(nil, rv, true); err != nil {
+		return nil, err
+	}
 	return toml.Marshal(v)
 }
