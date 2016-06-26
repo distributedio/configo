@@ -283,7 +283,7 @@ func Unmarshal(data []byte, v interface{}) error {
 	return nil
 }
 func Marshal(v interface{}) ([]byte, error) {
-	rv := reflect.ValueOf(v)
+	rv := reflect.ValueOf(&v)
 	if err := applyDefault(nil, rv, true); err != nil {
 		return nil, err
 	}
