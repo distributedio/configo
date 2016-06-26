@@ -120,7 +120,7 @@ func applyDefaultValue(fv reflect.Value, ft reflect.StructField, rv reflect.Valu
 		if ignoreRequired {
 			return nil
 		}
-		return fmt.Errorf("value of %q is required", ft.Name)
+		return fmt.Errorf("value of %q is required in %v", ft.Name, rv.Type())
 	}
 
 	//No default value supplied
