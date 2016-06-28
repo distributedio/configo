@@ -226,8 +226,6 @@ func applyDefault(t *ast.Table, rv reflect.Value, ignoreRequired bool) error {
 
 	rt := rv.Type()
 
-	fmt.Println("enter apply default", rt.Kind())
-
 	if kind := rt.Kind(); kind == reflect.Struct {
 		for i := 0; i < rt.NumField(); i++ {
 			ft := rt.Field(i)
