@@ -256,7 +256,6 @@ func applyDefault(t *ast.Table, rv reflect.Value, ignoreRequired bool) error {
 			}
 			if isEmptyValue(fv) {
 				if _, found := findField(t, ft); !found {
-					fmt.Println("apply default")
 					if err := applyDefaultValue(fv, ft, rv, ignoreRequired); err != nil {
 						return err
 					}
