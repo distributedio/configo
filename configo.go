@@ -226,6 +226,8 @@ func applyDefault(t *ast.Table, rv reflect.Value, ignoreRequired bool) error {
 
 	rt := rv.Type()
 
+	fmt.Println("enter apply default", rt.Kind())
+
 	if kind := rt.Kind(); kind == reflect.Struct {
 		for i := 0; i < rt.NumField(); i++ {
 			ft := rt.Field(i)
@@ -256,6 +258,7 @@ func applyDefault(t *ast.Table, rv reflect.Value, ignoreRequired bool) error {
 			}
 			if isEmptyValue(fv) {
 				if _, found := findField(t, ft); !found {
+					fmt.Println("apply default")
 					if err := applyDefaultValue(fv, ft, rv, ignoreRequired); err != nil {
 						return err
 					}
@@ -283,11 +286,16 @@ func Unmarshal(data []byte, v interface{}) error {
 	return nil
 }
 func Marshal(v interface{}) ([]byte, error) {
-	rv := reflect.ValueOf(&v)
-	if err := applyDefault(nil, rv, true); err != nil {
+	rv := reflect.ValueOf(v)
+	for rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+	pv := reflect.New(rv.Type())
+
+	if err := applyDefault(nil, pv, true); err != nil {
 		return nil, err
 	}
-	return toml.Marshal(v)
+	return toml.Marshal(pv.Interface())
 }
 
 //Patch the base using the value from v, the new bytes returned
