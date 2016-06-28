@@ -288,6 +288,7 @@ func Marshal(v interface{}) ([]byte, error) {
 		rv = rv.Elem()
 	}
 	pv := reflect.New(rv.Type())
+	pv.Elem().Set(rv)
 
 	if err := applyDefault(nil, pv, true); err != nil {
 		return nil, err
