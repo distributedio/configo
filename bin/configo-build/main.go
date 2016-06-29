@@ -50,7 +50,7 @@ func main() {
         fmt.Println(err)
         return
     } else {
-        fmt.Printf(string(data))
+        fmt.Println(string(data))
     }
 }
 `
