@@ -2,7 +2,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"go/build"
 	"io/ioutil"
 	"log"
 	"os"
@@ -56,22 +58,49 @@ func main() {
 `
 
 func main() {
-	args := os.Args
-	if len(args) != 2 {
+	genCode := false
+
+	flag.Usage = func() {
 		fmt.Println("Usage:")
-		fmt.Printf("  %s <package>.<struct>\n", args[0])
+		fmt.Printf("  %s [option] <package>.<struct>\n", os.Args[0])
+		flag.PrintDefaults()
+	}
+	flag.BoolVar(&genCode, "gencode", false, "generate source code")
+	flag.Parse()
+
+	args := flag.Args()
+	if len(args) != 1 {
+		flag.Usage()
 		return
 	}
 
-	pkg := args[1]
-	idx := strings.LastIndex(pkg, ".")
+	// Parse the package path and struct name
+	target := args[0]
+	idx := strings.LastIndex(target, ".")
 	if idx < 0 {
 		log.Fatalln("Invalid package format, expected <package>.<struct name>")
 	}
-	p := pkg[0:idx]
-	st := path.Base(p) + "." + pkg[idx+1:]
-	code := fmt.Sprintf(source, p, st)
-	//fmt.Print(code)
+	p := target[0:idx]
+	st := path.Base(p) + "." + target[idx+1:]
+
+	// Get current working dir
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Import the path
+	pkg, err := build.Import(p, cwd, 0)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	code := fmt.Sprintf(source, pkg.ImportPath, st)
+
+	if genCode {
+		fmt.Print(code)
+		return
+	}
 
 	tmpFile := fmt.Sprintf("/tmp/%s.pkg.go", st)
 	if err := ioutil.WriteFile(tmpFile, []byte(code), os.ModePerm&0660); err != nil {
