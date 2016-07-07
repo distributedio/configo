@@ -21,7 +21,7 @@ func Dump(file string, v interface{}) error {
 		return err
 	}
 
-	return ioutil.WriteFile(file, b, 0655)
+	return ioutil.WriteFile(file, b, 0644)
 }
 
 //Update an exist file
@@ -35,5 +35,5 @@ func Update(file string, v interface{}) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(file, out, 0655)
+	return ioutil.WriteFile(file, out, 0644)
 }
