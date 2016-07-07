@@ -99,7 +99,7 @@ Build a generator with configo-build
 
 	configo-build github.com/shafreeck/configo/example/conf.Config
 
-	or use relative package path if you are under configo directory
+or use relative package path if you are under configo directory
 
 	configo-build ./example/conf.Config
 
