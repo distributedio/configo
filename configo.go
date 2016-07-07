@@ -112,7 +112,7 @@ func unmarshalArray(key, value string, v interface{}) error {
 	return nil
 }
 
-func applyDefaultValue(fv reflect.Value, ft reflect.StructField, rv reflect.Value, ignoreRequired bool) error {
+func applyDefaultValue(fv reflect.Value, ft reflect.StructField, rv reflect.Value, ignoreRequired bool) (err error) {
 	tag := extractTag(ft.Tag.Get(fieldTagName))
 
 	//Default value is not supported
@@ -141,30 +141,30 @@ func applyDefaultValue(fv reflect.Value, ft reflect.StructField, rv reflect.Valu
 	switch fv.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16,
 		reflect.Int32, reflect.Int64:
-		if v, err := strconv.ParseInt(tag.Value, 10, 64); err != nil {
+		var v int64
+		if v, err = strconv.ParseInt(tag.Value, 10, 64); err != nil {
 			return err
-		} else {
-			fv.SetInt(v)
 		}
+		fv.SetInt(v)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16,
 		reflect.Uint32, reflect.Uint64:
-		if v, err := strconv.ParseUint(tag.Value, 10, 64); err != nil {
+		var v uint64
+		if v, err = strconv.ParseUint(tag.Value, 10, 64); err != nil {
 			return err
-		} else {
-			fv.SetUint(v)
 		}
+		fv.SetUint(v)
 	case reflect.Float32, reflect.Float64:
-		if v, err := strconv.ParseFloat(tag.Value, 64); err != nil {
+		var v float64
+		if v, err = strconv.ParseFloat(tag.Value, 64); err != nil {
 			return err
-		} else {
-			fv.SetFloat(v)
 		}
+		fv.SetFloat(v)
 	case reflect.Bool:
-		if v, err := strconv.ParseBool(tag.Value); err != nil {
+		var v bool
+		if v, err = strconv.ParseBool(tag.Value); err != nil {
 			return err
-		} else {
-			fv.SetBool(v)
 		}
+		fv.SetBool(v)
 	case reflect.String:
 		fv.SetString(tag.Value)
 	case reflect.Slice:
@@ -267,6 +267,7 @@ func applyDefault(t *ast.Table, rv reflect.Value, ignoreRequired bool) error {
 	return nil
 }
 
+//Unmarshal data into struct v, v shoud be a pointer to struct
 func Unmarshal(data []byte, v interface{}) error {
 	table, err := toml.Parse(data)
 	if err != nil {
@@ -282,6 +283,8 @@ func Unmarshal(data []byte, v interface{}) error {
 	}
 	return nil
 }
+
+//Marshal v to configuration in toml format
 func Marshal(v interface{}) ([]byte, error) {
 	rv := reflect.ValueOf(v)
 	for rv.Kind() == reflect.Ptr {
