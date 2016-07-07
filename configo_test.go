@@ -19,7 +19,7 @@ func TestUnmarshal(t *testing.T) {
 	if err := Unmarshal(data, c); err != nil {
 		t.Error(err)
 	}
-	t.Logf("Unmarshal result %s\v\n", c)
+	t.Logf("Unmarshal result %v\n", c)
 }
 func TestMarshal(t *testing.T) {
 	c := &Config{}

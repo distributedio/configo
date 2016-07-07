@@ -93,7 +93,6 @@ func validate(key, value string, rules []string) error {
 		validate, ok := govalidator.TagMap[rule]
 		if !ok {
 			return fmt.Errorf("validate rule %q is not supported", rule)
-			continue
 		}
 		if !validate(value) {
 			return fmt.Errorf("value of %q validate failed, %q does not match rule %q", key, value, rule)
