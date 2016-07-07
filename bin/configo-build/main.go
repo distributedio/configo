@@ -37,7 +37,7 @@ func main() {
             fmt.Println(err)
             return
         }
-        if data, err := configo.Patch(baseData, &config); err != nil {
+        if data, err := configo.Patch(baseData, config); err != nil {
             fmt.Println(err)
             return
         } else {

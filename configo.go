@@ -301,19 +301,25 @@ func Marshal(v interface{}) ([]byte, error) {
 //Patch the base using the value from v, the new bytes returned
 //combines the base's value and v's default value
 func Patch(base []byte, v interface{}) ([]byte, error) {
+	//Clone struct v, v shoud not be modified
+	rv := reflect.ValueOf(v)
+	for rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+	pv := reflect.New(rv.Type())
+	pv.Elem().Set(rv)
+
+	nv := pv.Interface()
+
 	//unmarshal base
 	table, err := toml.Parse(base)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := toml.UnmarshalTable(table, v); err != nil {
+	if err := toml.UnmarshalTable(table, nv); err != nil {
 		return nil, err
 	}
 
-	if err := applyDefault(table, reflect.ValueOf(v), true); err != nil {
-		return nil, err
-	}
-
-	return Marshal(v)
+	return Marshal(nv)
 }
