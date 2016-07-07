@@ -1,0 +1,18 @@
+#type:        string
+#rules:       netaddr
+#description: The address the server to listen
+#default:     :8804
+#listen = ":8804"
+
+#type:        int
+#rules:       numeric
+#description: Max number of concurrent connections
+#default:     10000
+#max-connection = 10000
+
+[redis]
+
+#type:        []string
+#rules:       dialstring
+#required
+cluster = []
