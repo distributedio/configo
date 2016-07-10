@@ -6,7 +6,7 @@ Configo is a go library to parse toml configuration using struct tags
 adding the abililty to parse complex struct tags.
 
 ## Validation
-configo use [govalidator](https://github.com/asaskevich/govalidator) to validate conf values
+configo has builtin validator with regex and range support
 
 ## Features
 * Configure parser behaviour using struct tags
