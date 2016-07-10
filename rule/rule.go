@@ -7,10 +7,7 @@ import (
 	"time"
 )
 
-type Rule interface {
-	Parse() []Validator
-}
-type rule string
+type Rule string
 
 const (
 	rule_start = iota
@@ -19,10 +16,10 @@ const (
 	rule_end
 )
 
-func (r rule) Parse() ([]Validator, error) {
+func (r Rule) Parse() ([]Validator, error) {
 	var vlds []Validator
 
-	add := func(r rule, pos int, f func(string, int) (Validator, int, error)) (int, error) {
+	add := func(r Rule, pos int, f func(string, int) (Validator, int, error)) (int, error) {
 		v, pos, err := f(string(r), pos)
 		if err != nil {
 			return pos, err

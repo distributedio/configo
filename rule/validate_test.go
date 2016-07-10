@@ -7,7 +7,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	r := rule("(1, 10) netaddr /ab[cd]/ > 10")
+	r := Rule("(1, 10) netaddr /ab[cd]/ > 10")
 	vlds, err := r.Parse()
 	if err != nil {
 		t.Fatal(err)
