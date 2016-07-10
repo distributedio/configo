@@ -65,7 +65,7 @@ func isEmptyValue(v reflect.Value) bool {
 }
 
 func extractTag(tag string) *toml.CfgTag {
-	tags := strings.SplitN(tag, ",", 4)
+	tags := strings.SplitN(tag, ";", 4)
 	cfg := &toml.CfgTag{}
 	switch c := len(tags); c {
 	case 1:
