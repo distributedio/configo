@@ -35,7 +35,7 @@ func (n *vrange) String() string {
 }
 
 func (n *vrange) Validate(value string) error {
-	v, err := strconv.ParseInt(value, 0, 10)
+	v, err := strconv.ParseInt(value, 0, 64)
 	if err != nil {
 		prevErr := err
 		d, err := time.ParseDuration(value)
