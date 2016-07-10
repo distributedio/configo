@@ -1,12 +1,11 @@
 package configo
 
 import (
-	"github.com/asaskevich/govalidator"
+	"github.com/shafreeck/configo/rule"
 	"github.com/shafreeck/toml"
 	"github.com/shafreeck/toml/ast"
 
 	"fmt"
-	"net"
 	"reflect"
 	"strconv"
 	"strings"
@@ -19,18 +18,6 @@ const (
 
 func init() {
 	toml.SetValue = fieldValidate
-	govalidator.TagMap["netaddr"] = func(addr string) bool {
-		if h, p, err := net.SplitHostPort(addr); err == nil {
-			if h != "" && !(govalidator.IsDNSName(h) || govalidator.IsIP(h)) {
-				return false
-			}
-			if p != "" && !govalidator.IsPort(p) {
-				return true
-			}
-			return true
-		}
-		return false
-	}
 }
 
 func fieldValidate(field string, rv reflect.Value, av ast.Value, tag *toml.CfgTag) error {
@@ -39,8 +26,7 @@ func fieldValidate(field string, rv reflect.Value, av ast.Value, tag *toml.CfgTa
 	}
 	val, ok := av.(*ast.String)
 	if tag.Check != "" && ok {
-		rules := strings.Split(tag.Check, " ")
-		return validate(field, val.Value, rules)
+		return validate(field, val.Value, tag.Check)
 	}
 	return nil
 }
@@ -88,14 +74,15 @@ func extractTag(tag string) *toml.CfgTag {
 	return cfg
 }
 
-func validate(key, value string, rules []string) error {
-	for _, rule := range rules {
-		validate, ok := govalidator.TagMap[rule]
-		if !ok {
-			return fmt.Errorf("validate rule %q is not supported", rule)
-		}
-		if !validate(value) {
-			return fmt.Errorf("value of %q validate failed, %q does not match rule %q", key, value, rule)
+func validate(key, value string, check string) error {
+	r := rule.Rule(check)
+	vlds, err := r.Parse()
+	if err != nil {
+		return err
+	}
+	for i, vld := range vlds {
+		if err := vld.Validate(value); err != nil {
+			return fmt.Errorf("validate %s failed, %s does not match rule[%v], reason: %v", key, value, i, err)
 		}
 	}
 	return nil
@@ -130,8 +117,7 @@ func applyDefaultValue(fv reflect.Value, ft reflect.StructField, rv reflect.Valu
 	//Validate the default value
 	//reflect.Slice will be validated by unmarshalArray
 	if tag.Check != "" && fv.Kind() != reflect.Slice {
-		rules := strings.Split(tag.Check, " ")
-		if err := validate(ft.Name, tag.Value, rules); err != nil {
+		if err := validate(ft.Name, tag.Value, tag.Check); err != nil {
 			return err
 		}
 	}
