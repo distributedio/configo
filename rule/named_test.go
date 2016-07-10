@@ -25,4 +25,13 @@ func TestValidatePath(t *testing.T) {
 	if err := ValidatePath(".././../abc"); err != nil {
 		t.Fatal(err)
 	}
+	if err := ValidatePath("./"); err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidatePath("/"); err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidatePath("."); err != nil {
+		t.Fatal(err)
+	}
 }
