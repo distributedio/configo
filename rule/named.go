@@ -12,7 +12,7 @@ func init() {
 	namedValidators["netaddr"] = ValidateNetAddr
 	namedValidators["url"] = ValidateURL
 	namedValidators["nonempty"] = ValidateNonempty
-	namedValidators["dailstring"] = ValidateDialString
+	namedValidators["dialstring"] = ValidateDialString
 	namedValidators["boolean"] = ValidateBoolean
 	namedValidators["numeric"] = ValidateNumeric
 	namedValidators["printableascii"] = ValidatePrintableASCII
@@ -61,9 +61,9 @@ func ValidateDialString(value string) error {
 		return err
 	}
 
-	_, err = strconv.ParseInt(p, 0, 10)
+	_, err = strconv.ParseInt(p, 0, 64)
 	if err != nil {
-		return errors.New("port should be a number")
+		return err
 	}
 
 	if h == "" {
