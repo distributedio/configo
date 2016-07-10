@@ -32,6 +32,8 @@ netaddr //named validator, used to validate a network address
 numeric  >10 ( ,100)// mix different expressions, 'and' is used to combine all expressions
 ```
 
+See the [source code](https://github.com/shafreeck/configo/blob/master/rule/named.go#L12) for all valid "named validators"
+
 ## Struct tags
 
 `tags` has a key 'cfg' and its value consists of four parts: "name; default value or required; rule; descripion".
