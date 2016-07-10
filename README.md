@@ -24,18 +24,18 @@ configo has a builtin validator with regex and range support
 (1, 10) // >1 <10
 (1,10]  // >1 <=10
 
-/[0-9]/ //match regex
+/[0-9]/ //regex matching
 
-/[0-9]+/ (1, 10) // the value should satisfy both the regex and the range expression
+/[0-9]+/ (1, 10) // the value should satisfy both the regex and range expression
 
 netaddr //named validator, used to validate a network address
-numeric  >10 ( ,100)// mix different expressions, 'and' is used to all expressions
+numeric  >10 ( ,100)// mix different expressions, 'and' is used to combine all expressions
 ```
 
 ## Struct tags
 
-`tag` has a key 'cfg' and its value consist of four parts: name, default value or required, rule, descripion.
-All four parts splited by ";".
+`tags` has a key 'cfg' and its value consists of four parts: "name; default value or required; rule; descripion".
+All four parts are splited by ";".
 
 For example:
 ```go
