@@ -80,9 +80,9 @@ func validate(key, value string, check string) error {
 	if err != nil {
 		return err
 	}
-	for i, vld := range vlds {
+	for _, vld := range vlds {
 		if err := vld.Validate(value); err != nil {
-			return fmt.Errorf("validate %s failed, %s does not match rule[%v], reason: %v", key, value, i, err)
+			return fmt.Errorf("validate %s failed, %s does not match rule %q, reason: %v", key, value, check, err)
 		}
 	}
 	return nil
