@@ -1,67 +1,116 @@
 # Configo
 Configo is a go library to parse toml configuration using struct tags
 
+## Features
+* Configuring parser behaviour using struct tags
+* Setting default value or as required
+* Validating value using regex, range expression or named validator
+* Generating toml template with human friendly information based on go struct and tags
+* Building conf file generation tools using configo-build
+
 ## Toml
 [shafreeck/toml](https://github.com/shafreeck/toml) is a modification version of [naoina/toml](https://github.com/naoina/toml),
-adding the abililty to parse complex struct tags.
+adding the abililty to parse complex struct tags and bug fixed.
 
 ## Validation
 configo has builtin validator with regex and range support
 
-## Features
-* Configure parser behaviour using struct tags
-* Set default value or required
-* Validate value using govalidator(Validators with parameters will be supported soon)
-* Generate toml template basing on go struct and tags
-* Build generating tools using configo-build
+```go
+> 1 //greater than 1
+>=1 //greater than or equal to 1
+>1 <10 //greater than 1 and less than 10, space indicates the "and" of rules
+
+(1, ) //range expression, same as >1
+(1, 10) // >1 <10
+(1,10]  // >1 <=10
+
+/[0-9]/ //match regex
+
+/[0-9]+/ (1, 10) // the value should satisfy both the regex and the range expression
+
+netaddr //named validator, used to validate a network address
+numeric  >10 ( ,100)// mix different expressions, 'and' is used to all expressions
+```
+
+## Struct tags
+
+`tag` has a key 'cfg' and its value consist of for parts: name, default value or required, rule, descripion.
+All four parts splited by ";".
+
+For example:
+```go
+Listen `cfg:"listen; :8804; netaddr; The listen address of server"`
+```
+
+It looks like this when marshaled to toml
+```toml
+#type:        string
+#rules:       netaddr
+#description: The listen address of server
+#default:     :8804
+#listen=":8804"
+```
+
+You can see that we have rich information about the option. And the option is commented out too because it has a default value.
+
+## config-build
+Configo comes with a util too call configo-build to build a tool or generate some code for you.
+
+You can use the built tool to generate your toml configuration file or update it when you have change your source code(the configuration struct).
+
+```sh
+configo-build ./conf.Config
+#build a conf generator, the format of arg is "package.struct" package can be
+#absolute or relative(golang takes it as an absolute package if it is without
+#the prefix "./" or "../").
+
+#the built program has a name with format:<package>.<struct>.cfg, for example
+#"conf.config.cfg"
+```
+
+Generating your configuration file with the built generator
+```sh
+conf.config.cfg > conf.toml #generate
+conf.config.cfg -patch conf.toml #update if conf.toml has already existed
+```
 
 ## Example
 
-### Unmarshal toml to config
+### Define a struct in package conf
 ```go
-package main
+package conf
 
-import (
-        "fmt"
-
-        "github.com/shafreeck/configo"
-)
-
-//`cfg:"name, required or default value, validate, descripion"`
 type Config struct {
-        Listen   string `cfg:"listen; :8804; netaddr; server listen address"`
-        MaxConns int    `cfg:"maxconns; 1000; numeric; max number of connections"`
-}
-
-func main() {
-        data := []byte("")
-        v := &Config{}
-        if err := configo.Unmarshal(data, v); err != nil {
-                fmt.Println(err)
-                return
+        Listen  string `cfg:"listen; :8804; netaddr; The address the server to listen"`
+        MaxConn int    `cfg:"max-connection; 10000; numeric; Max number of concurrent connections"`
+        Redis   struct {
+                Cluster []string `cfg:"cluster; required; dialstring; The addresses of redis cluster"`
         }
-        fmt.Println(v)
 }
 ```
 
-## Generate toml from struct
+## Build the configuration file generator
 
 ### First, install configo-build
-```
+```sh
 go get github.com/shafreeck/configo/bin/configo-build
 ```
 
-### Second, build an executable program basing on your package and struct
+### Then, build an executable program basing on your package and struct
+```sh
+configo-build ./conf.Config
 ```
-configo-build <package>.<struct>
+or use the absolute path
+```sh
+configo-build github.com/shafreeck/configo/example/conf.Config
 ```
 ### Finally, use the built program to generate a toml
 ```
-<built program> > conf.toml
+conf.config.cfg > conf.toml
 ```
 and you can patch you toml file if it is already existed
 ```
-<built program> -patch conf.toml
+conf.config.cfg -patch conf.toml
 ```
 
 Output
@@ -69,24 +118,21 @@ Output
 ```toml
 #type:        string
 #rules:       netaddr
-#description: listen address of server
-#default:     :8805
-#listen=""
+#description: The address the server to listen
+#default:     :8804
+#listen = ":8804"
 
 #type:        int
 #rules:       numeric
-#required
-max-conn=0
+#description: Max number of concurrent connections
+#default:     10000
+#max-connection = 10000
 
 [redis]
 
 #type:        []string
 #rules:       dialstring
-#default:     ['127.0.0.1:8800']
-#cluster=[]
-
-[redis.net]
-
-#type:        int
-timeout=0
+#description: The addresses of redis cluster
+#required
+cluster = []
 ```
