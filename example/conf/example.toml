@@ -14,5 +14,6 @@
 
 #type:        []string
 #rules:       dialstring
+#description: The addresses of redis cluster
 #required
 cluster = []
