@@ -34,7 +34,7 @@ numeric  >10 ( ,100)// mix different expressions, 'and' is used to all expressio
 
 ## Struct tags
 
-`tag` has a key 'cfg' and its value consist of for parts: name, default value or required, rule, descripion.
+`tag` has a key 'cfg' and its value consist of four parts: name, default value or required, rule, descripion.
 All four parts splited by ";".
 
 For example:
@@ -42,7 +42,7 @@ For example:
 Listen `cfg:"listen; :8804; netaddr; The listen address of server"`
 ```
 
-It looks like this when marshaled to toml
+It looks like this when being marshaled to toml
 ```toml
 #type:        string
 #rules:       netaddr
@@ -53,10 +53,10 @@ It looks like this when marshaled to toml
 
 You can see that we have rich information about the option. And the option is commented out too because it has a default value.
 
-## config-build
-Configo comes with a util too call configo-build to build a tool or generate some code for you.
+## configo-build
+Configo comes with a util tool called configo-build to build a configration file generator for you.
 
-You can use the built tool to generate your toml configuration file or update it when you have change your source code(the configuration struct).
+You can use the generator to generate your toml file or update it when you changed your source code(the configuration struct).
 
 ```sh
 configo-build ./conf.Config
@@ -70,8 +70,8 @@ configo-build ./conf.Config
 
 Generating your configuration file with the built generator
 ```sh
-conf.config.cfg > conf.toml #generate
-conf.config.cfg -patch conf.toml #update if conf.toml has already existed
+conf.config.cfg > conf.toml #generating
+conf.config.cfg -patch conf.toml #updating if conf.toml has already existed
 ```
 
 ## Example
