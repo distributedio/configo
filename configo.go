@@ -6,6 +6,7 @@ import (
 	"github.com/shafreeck/toml/ast"
 
 	"fmt"
+	goast "go/ast"
 	"reflect"
 	"strconv"
 	"strings"
@@ -215,6 +216,9 @@ func applyDefault(t *ast.Table, rv reflect.Value, ignoreRequired bool) error {
 		for i := 0; i < rt.NumField(); i++ {
 			ft := rt.Field(i)
 			fv := rv.Field(i)
+			if !goast.IsExported(ft.Name) {
+				continue
+			}
 			for fv.Kind() == reflect.Ptr {
 				fv = fv.Elem()
 			}
