@@ -243,7 +243,7 @@ func applyDefault(t *ast.Table, rv reflect.Value, ignoreRequired bool) error {
 				}
 				continue
 			}
-			if isEmptyValue(fv) {
+			if fv.IsValid() && isEmptyValue(fv) {
 				if _, found := findField(t, ft); !found {
 					if err := applyDefaultValue(fv, ft, rv, ignoreRequired); err != nil {
 						return err
