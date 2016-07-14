@@ -265,9 +265,9 @@ LOOP:
 				return nil, i, fmt.Errorf("rule parse error at position %d of rule %s, '=' should comes after '>' or '<'", i, r)
 			}
 			if lt {
-				v.left = true
-			} else {
 				v.right = true
+			} else {
+				v.left = true
 			}
 			vstart += 1
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '.', //positive, negative, or float digital

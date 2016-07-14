@@ -248,6 +248,27 @@ func TestParseCompExp(t *testing.T) {
 		t.Fatal(v)
 	}
 
+	val = ">   =1"
+	v, pos, err = parseCompExp(val, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pos != len(val) { //ended by the string length limitation
+		t.Fatal(pos)
+	}
+	if v.min != 1 {
+		t.Fatal(v)
+	}
+	if v.max != math.MaxInt64 {
+		t.Fatal(v)
+	}
+	if v.left != true {
+		t.Fatal(v)
+	}
+	if v.right != false {
+		t.Fatal(v)
+	}
+
 }
 
 func TestParseRegex(t *testing.T) {
