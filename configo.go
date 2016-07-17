@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 )
 
@@ -129,6 +130,13 @@ func applyDefaultValue(fv reflect.Value, ft reflect.StructField, rv reflect.Valu
 		reflect.Int32, reflect.Int64:
 		var v int64
 		if v, err = strconv.ParseInt(tag.Value, 10, 64); err != nil {
+			if fv.Kind() == reflect.Int64 {
+				//try to parse a time.Duration
+				if d, err := time.ParseDuration(tag.Value); err == nil {
+					fv.SetInt(int64(d))
+					return nil
+				}
+			}
 			return err
 		}
 		fv.SetInt(v)
