@@ -26,7 +26,9 @@ import(
 )
 func main() {
     base := ""
+	test := ""
     flag.StringVar(&base, "patch", "", "the base conf that to patch")
+    flag.StringVar(&test, "test", "", "try to load the configuration file")
     flag.Parse()
 
     config := %s{} //the struct
@@ -47,6 +49,14 @@ func main() {
         }
         return
     }
+	if test != "" {
+		if err := configo.Load(test, &config); err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println("Load successfully !")
+		}
+		return
+	}
 
     if data, err := configo.Marshal(config); err != nil {
         fmt.Println(err)
