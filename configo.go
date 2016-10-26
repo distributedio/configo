@@ -251,6 +251,23 @@ func applyDefault(t *ast.Table, rv reflect.Value, ignoreRequired bool) error {
 				}
 				continue
 			}
+
+			//Maybe array of table
+			if fv.IsValid() && !isEmptyValue(fv) && fv.Kind() == reflect.Slice {
+				if arrtable, found := findField(t, ft); found {
+					arrtable, ok := arrtable.([]*ast.Table)
+					if ok {
+						for i = 0; i < fv.Len(); i++ {
+							ev := fv.Index(i)
+							st := arrtable[i]
+							if err := applyDefault(st, ev, ignoreRequired); err != nil {
+								return err
+							}
+						}
+					}
+				}
+			}
+
 			if fv.IsValid() && isEmptyValue(fv) {
 				if _, found := findField(t, ft); !found {
 					if err := applyDefaultValue(fv, ft, rv, ignoreRequired); err != nil {
