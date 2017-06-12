@@ -257,9 +257,9 @@ func applyDefault(t *ast.Table, rv reflect.Value, ignoreRequired bool) error {
 				if arrtable, found := findField(t, ft); found {
 					arrtable, ok := arrtable.([]*ast.Table)
 					if ok {
-						for i = 0; i < fv.Len(); i++ {
-							ev := fv.Index(i)
-							st := arrtable[i]
+						for j := 0; j < fv.Len(); j++ {
+							ev := fv.Index(j)
+							st := arrtable[j]
 							if err := applyDefault(st, ev, ignoreRequired); err != nil {
 								return err
 							}
