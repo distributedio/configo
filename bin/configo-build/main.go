@@ -4,13 +4,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go/build"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
+
+	"golang.org/x/tools/go/packages"
 )
 
 var source = `package main
@@ -93,19 +94,16 @@ func main() {
 	p := target[0:idx]
 	st := path.Base(p) + "." + target[idx+1:]
 
-	// Get current working dir
-	cwd, err := os.Getwd()
+	pkgs, err := packages.Load(nil, p)
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	// Import the path
-	pkg, err := build.Import(p, cwd, 0)
-	if err != nil {
-		log.Fatalln(err)
+	if len(pkgs) != 1 {
+		log.Fatalln("Package is not found", p)
 	}
+	pkg := pkgs[0]
 
-	code := fmt.Sprintf(source, pkg.ImportPath, st)
+	code := fmt.Sprintf(source, pkg, st)
 
 	if genCode {
 		fmt.Print(code)
