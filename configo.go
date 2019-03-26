@@ -161,7 +161,7 @@ func applyDefaultValue(fv reflect.Value, ft reflect.StructField, rv reflect.Valu
 		fv.SetBool(v)
 	case reflect.String:
 		fv.SetString(tag.Value)
-	case reflect.Slice:
+	case reflect.Slice, reflect.Array:
 		v := rv.Addr().Interface()
 		if err := unmarshalArray(ft.Name, tag.Value, v); err != nil {
 			return err
@@ -213,7 +213,7 @@ func findField(t *ast.Table, field reflect.StructField) (interface{}, bool) {
 	return nil, false
 }
 
-func applyDefault(t *ast.Table, rv reflect.Value, ignoreRequired bool) error {
+func applyDefault(rv reflect.Value, ignoreRequired bool) error {
 	for rv.Kind() == reflect.Ptr {
 		rv = rv.Elem()
 	}
@@ -231,48 +231,25 @@ func applyDefault(t *ast.Table, rv reflect.Value, ignoreRequired bool) error {
 				fv = fv.Elem()
 			}
 			if fv.Kind() == reflect.Struct {
-				var subt *ast.Table
-				var ok bool
-				if f, found := findField(t, ft); found {
-					subt, ok = f.(*ast.Table)
-					//Assgin t back to subt
-					//This is becuase the reflect.Struct is emmbed
-					// type D struct {
-					//    time.Duration
-					// }
-					// D is a struct , but there is no sub table in conf
-					if !ok {
-						subt = t
-					}
-				}
-
-				if err := applyDefault(subt, fv, ignoreRequired); err != nil {
+				if err := applyDefault(fv, ignoreRequired); err != nil {
 					return err
 				}
 				continue
 			}
 
 			//Maybe array of table
-			if fv.IsValid() && !isEmptyValue(fv) && fv.Kind() == reflect.Slice {
-				if arrtable, found := findField(t, ft); found {
-					arrtable, ok := arrtable.([]*ast.Table)
-					if ok {
-						for j := 0; j < fv.Len(); j++ {
-							ev := fv.Index(j)
-							st := arrtable[j]
-							if err := applyDefault(st, ev, ignoreRequired); err != nil {
-								return err
-							}
-						}
+			if fv.IsValid() && !isEmptyValue(fv) && (fv.Kind() == reflect.Slice || fv.Kind() == reflect.Array) {
+				for j := 0; j < fv.Len(); j++ {
+					ev := fv.Index(j)
+					if err := applyDefault(ev, ignoreRequired); err != nil {
+						return err
 					}
 				}
 			}
 
 			if fv.IsValid() && isEmptyValue(fv) {
-				if _, found := findField(t, ft); !found {
-					if err := applyDefaultValue(fv, ft, rv, ignoreRequired); err != nil {
-						return err
-					}
+				if err := applyDefaultValue(fv, ft, rv, ignoreRequired); err != nil {
+					return err
 				}
 			}
 		}
@@ -292,7 +269,7 @@ func Unmarshal(data []byte, v interface{}) error {
 		return err
 	}
 
-	if err := applyDefault(table, reflect.ValueOf(v), false); err != nil {
+	if err := applyDefault(reflect.ValueOf(v), false); err != nil {
 		return err
 	}
 	return nil
@@ -307,7 +284,7 @@ func Marshal(v interface{}) ([]byte, error) {
 	pv := reflect.New(rv.Type())
 	pv.Elem().Set(rv)
 
-	if err := applyDefault(nil, pv, true); err != nil {
+	if err := applyDefault(pv, true); err != nil {
 		return nil, err
 	}
 	return toml.Marshal(pv.Interface())

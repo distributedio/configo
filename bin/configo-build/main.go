@@ -54,6 +54,7 @@ func main() {
 		if err := configo.Load(test, &config); err != nil {
 			fmt.Println(err)
 		} else {
+			fmt.Println(config)
 			fmt.Println("Load successfully !")
 		}
 		return
