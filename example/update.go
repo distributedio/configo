@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/shafreeck/configo"
-	"github.com/shafreeck/configo/example/conf"
+	"github.com/distributedio/configo"
+	"github.com/distributedio/configo/example/conf"
 )
 
 func main() {

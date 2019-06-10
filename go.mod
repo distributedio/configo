@@ -1,4 +1,4 @@
-module github.com/shafreeck/configo
+module github.com/distributedio/configo
 
 go 1.12
 

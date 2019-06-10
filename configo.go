@@ -1,7 +1,7 @@
 package configo
 
 import (
-	"github.com/shafreeck/configo/rule"
+	"github.com/distributedio/configo/rule"
 	"github.com/shafreeck/toml"
 	"github.com/shafreeck/toml/ast"
 

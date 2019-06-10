@@ -32,7 +32,7 @@ netaddr //named validator, used to validate a network address
 numeric  >10 ( ,100)// mix different expressions, 'and' is used to combine all expressions
 ```
 
-See the [source code](https://github.com/shafreeck/configo/blob/master/rule/named.go#L12) for all valid "named validators"
+See the [source code](https://github.com/distributedio/configo/blob/master/rule/named.go#L12) for all valid "named validators"
 
 ## Struct tags
 
@@ -95,7 +95,7 @@ type Config struct {
 
 ### First, install configo-build
 ```sh
-go get github.com/shafreeck/configo/bin/configo-build
+go get github.com/distributedio/configo/bin/configo-build
 ```
 
 ### Then, build an executable program basing on your package and struct
@@ -104,7 +104,7 @@ configo-build ./conf.Config
 ```
 or use the absolute path
 ```sh
-configo-build github.com/shafreeck/configo/example/conf.Config
+configo-build github.com/distributedio/configo/example/conf.Config
 ```
 ### Finally, use the built program to generate a toml
 ```

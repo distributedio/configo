@@ -97,7 +97,7 @@ for you.
 
 Build a generator with configo-build
 
-	configo-build github.com/shafreeck/configo/example/conf.Config
+	configo-build github.com/distributedio/configo/example/conf.Config
 
 or use relative package path if you are under configo directory
 
