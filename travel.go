@@ -22,48 +22,52 @@ func (t *Travel) Travel(obj interface{}) {
 func (t *Travel) travel(path string, v reflect.Value) {
 	switch v.Kind() {
 	case reflect.Ptr:
-		fmt.Printf("travel ptr")
 		vValue := v.Elem()
 		if !vValue.IsValid() {
 			return
 		}
 		t.travel(path, vValue)
 	case reflect.Interface:
-		fmt.Printf("travel interface")
-		/*
-			vValue := v.Elem()
-			copyValue := reflect.New(vValue.Type()).Elem()
-			travel(copyValue, vValue)
-			copy.Set(copyValue)
-		*/
+		vValue := v.Elem()
+		if !vValue.IsValid() {
+			return
+		}
+		t.travel(path, vValue)
 	case reflect.Struct:
-		fmt.Printf("travel strcut")
 		for i := 0; i < v.NumField(); i += 1 {
 			if !v.Field(i).IsValid() {
 				continue
 			}
-			tag := extractTag(v.Type().Field(i).Tag.Get(fieldTagName))
-			t.travel(path+"."+tag.Name, v.Field(i))
+			p := getPath(path, v.Type().Field(i))
+			t.travel(p, v.Field(i))
 		}
-	case reflect.Slice:
-		for i := 0; i < v.Len(); i += 1 {
-			p := fmt.Sprintf("%s.%d.", path, i)
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < v.Len(); i++ {
+			p := fmt.Sprintf("%d", i)
+			if len(path) > 0 {
+				p = path + "." + p
+			}
 			t.travel(p, v.Index(i))
 		}
-	case reflect.Map:
-		/*
-			for _, key := range v.MapKeys() {
-				vValue := v.MapIndex(key)
-				copyValue := reflect.New(vValue.Type()).Elem()
-				t.travel(copyValue, vValue)
-				copy.SetMapIndex(key, copyValue)
-			}
-		*/
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		fallthrough
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		fallthrough
+	case reflect.Float32, reflect.Float64:
+		fallthrough
+	case reflect.Bool:
+		fallthrough
 	case reflect.String:
-		// TODO get path
 		t.handle(path, v)
 	default:
-		fmt.Printf("default set value %#v\n", v)
-		//copy.Set(v)
+		panic(fmt.Sprintf("config file use unsupport type. %v", v.Type()))
 	}
+}
+
+func getPath(prefix string, f reflect.StructField) string {
+	tag := extractTag(f.Tag.Get(fieldTagName))
+	if len(prefix) == 0 {
+		return tag.Name
+	}
+	return prefix + "." + tag.Name
 }
