@@ -53,6 +53,7 @@ func TestTravel_Travel(t *testing.T) {
 				Cluster: []string{"127.0.0.1:6379", "127.0.0.1:7379"},
 			},
 			want: map[string]interface{}{
+				"cluster":   []string{"127.0.0.1:6379", "127.0.0.1:7379"},
 				"cluster.0": "127.0.0.1:6379",
 				"cluster.1": "127.0.0.1:7379",
 			},
@@ -65,6 +66,7 @@ func TestTravel_Travel(t *testing.T) {
 				Cluster: [2]string{"127.0.0.1:6379", "127.0.0.1:7379"},
 			},
 			want: map[string]interface{}{
+				"cluster":   [2]string{"127.0.0.1:6379", "127.0.0.1:7379"},
 				"cluster.0": "127.0.0.1:6379",
 				"cluster.1": "127.0.0.1:7379",
 			},
@@ -106,6 +108,8 @@ func TestTravel_Travel(t *testing.T) {
 					wt := reflect.ValueOf(w)
 					testEqual(t, wt, v)
 					delete(tt.want, path)
+				} else {
+					require.FailNowf(t, "unknow path", "path=%s, v=%v", path, v)
 				}
 			}
 			tr := NewTravel(handle)
@@ -119,7 +123,7 @@ func TestTravel_Travel(t *testing.T) {
 }
 
 func testEqual(t *testing.T, want, get reflect.Value) {
-	require.Equal(t, want.Kind(), get.Kind())
+	require.Equal(t, want.Kind(), get.Kind(), "data kind not same")
 	switch get.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		require.Equal(t, want.Int(), get.Int())

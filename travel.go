@@ -42,11 +42,14 @@ func (t *Travel) travel(path string, v reflect.Value) {
 			t.travel(p, v.Field(i))
 		}
 	case reflect.Slice, reflect.Array:
+		// handle slice & array as a whole
+		t.handle(path, v)
 		for i := 0; i < v.Len(); i++ {
 			p := fmt.Sprintf("%d", i)
 			if len(path) > 0 {
 				p = path + "." + p
 			}
+			// handle every element
 			t.travel(p, v.Index(i))
 		}
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
