@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/shafreeck/toml"
 	"github.com/stretchr/testify/require"
 )
 
@@ -103,7 +104,7 @@ func TestTravel_Travel(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			handle := func(path string, v reflect.Value) {
+			handle := func(path string, tag *toml.CfgTag, v reflect.Value) {
 				if w, ok := tt.want[path]; ok {
 					wt := reflect.ValueOf(w)
 					testEqual(t, wt, v)

@@ -1,5 +1,11 @@
 package configo
 
+import (
+	"reflect"
+
+	"github.com/shafreeck/toml"
+)
+
 // Flags 将类中的变量加入到flags中，从而可以通过命令行进行设置
 // 可以通过keys指定范围的成员加入到flags中，如果不指定则将所有的
 // 变量都加入到flags中
@@ -8,20 +14,21 @@ package configo
 // 2. 多级变量：使用 root.child 的形式作为变量名称
 // 3. 数组变量：数组下标作为一个层级，例如要设置root[0].key, 则flags中的key名称为root.0.key
 func Flags(obj interface{}, keys ...string) {
-	/*
-		t := newTravel(func(path string, v reflect.Value) {
-			if len(keys) > 0 && !match(path, keys) {
-				return
-			}
-			switch v.Kind() {
-			case Int:
-				value := flags.IntVal()
-				addtomap
-			default:
-			}
-		})
-		t.travel(obj)
-	*/
+	m := make(map[string]struct{})
+	for i := range keys {
+		m[keys[i]] = struct{}{}
+	}
+	t := NewTravel(func(path string, tag *toml.CfgTag, v reflect.Value) {
+		if _, ok := m[path]; len(m) > 0 && !ok {
+			return
+		}
+		switch v.Kind() {
+		case reflect.Int:
+			//flags.Int(path, i, des)
+		default:
+		}
+	})
+	t.Travel(obj)
 
 	// 1. 遍历所有变量
 	// 2. 如果keys没有设置，则默认是将所有的变量都加入到flags中
