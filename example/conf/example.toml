@@ -10,10 +10,10 @@
 #default:     10000
 #max-connection = 10000
 
-[redis]
+#[redis]
 
 #type:        []string
 #rules:       dialstring
 #description: The addresses of redis cluster
 #required
-cluster = []
+#cluster = []

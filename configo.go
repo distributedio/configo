@@ -272,6 +272,9 @@ func Unmarshal(data []byte, v interface{}) error {
 	if err := applyDefault(reflect.ValueOf(v), false); err != nil {
 		return err
 	}
+
+	// apply flag param
+	ApplyFlags(v)
 	return nil
 }
 
