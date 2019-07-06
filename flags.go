@@ -10,16 +10,63 @@ import (
 	"github.com/shafreeck/toml"
 )
 
-var flagMap = make(map[string]struct{})
+/*
+	`flags` 实现将对象中的变量添加到`flag`中，从而实现通过命令行设置变量的功能。
 
-// Flags 将类中的变量加入到flags中，从而可以通过命令行进行设置
-// 可以通过keys指定范围的成员加入到flags中，如果不指定则将所有的
-// 变量都加入到flags中
-// 不同类型变量的书写规则
-// 1. 一级变量，即只有一层变量
-// 2. 多级变量：使用 root.child 的形式作为变量名称
-// 3. 数组变量：数组下标作为一个层级，例如要设置root[0].key, 则flags中的key名称为root.0.key
-func Flags(obj interface{}, keys ...string) {
+		import (
+			"log"
+
+			"github.com/distributedio/configo"
+		)
+
+		type Config struct {
+			Key       string   `cfg:"key; default;; simple type example"`
+			Child     *Child   `cfg:"child; ;; class type "`
+			Array     []string `cfg:"array;;; simple array type"`
+			CompArray []*Child `cfg:"comp;;; complex array type"`
+		}
+
+		type Child struct {
+			Name string `cfg:"name; noname;; child class item`
+		}
+
+		func main() {
+			conf := &Config{}
+			configo.AddFlags(conf)
+			flag.Parse()
+
+			if err := configo.Load("conf/example.toml", conf); err != nil {
+				log.Fatalln(err)
+			}
+		}
+
+	首先，需要在`flag.Parse()`之前调用`AddFlags()`将对象中的变量添加到`falg`中。
+	`configo.Load()`会在内部调用`ApplyFlags()`方法，将`flag`中设置的变量应用到
+	对象中。
+
+	对象中的变量按照如下规则对应`flag`中的`key`：
+
+	* 简单数据类型，直接使用`cfg`中的`name`作为`flag`中的`key`。
+	  如`Conf.Key`，对应`flag`中的`key`。
+	* 对象数据类型，需要添加上一层对象的名称。
+	  如 `Conf.Child.Name` 对应`flag`中的`child.name`
+	* 数组或slice类型，要增加下标作为一个层级。
+	  如 `Conf.CompArray[0].Name`，对应`flag`中的`comp.0.name`
+	* 对于简单数据类型的数组或slice也可以使用名称作为`flag`中的`key`，
+	  使用字符串表示一个数组。
+	  例如：`Conf.Array`，对应`flag`中的`array`。同时在执行中，使用如下的
+	  方式设置`array`:
+		./cmd -array="[\"a1\", \"a2\"]"
+*/
+
+var flagMap map[string]struct{} = nil
+
+// AddFlags 将对象中的变量加入到flag中，从而可以通过命令行设置对应的变量。
+//
+// * `obj`  为待加入到`flag`中的对象的实例
+// * `keys` 限定加入`flag`中变量的范围，**不设置**的时候表示将所有变量都加入到`flag`中。
+func AddFlags(obj interface{}, keys ...string) {
+	flagMap = make(map[string]struct{}, len(keys))
 	for i := range keys {
 		flagMap[keys[i]] = struct{}{}
 	}
@@ -28,7 +75,6 @@ func Flags(obj interface{}, keys ...string) {
 			return
 		}
 		var err error
-		//Set the default value
 		switch fv.Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16,
 			reflect.Int32, reflect.Int64:
@@ -70,26 +116,24 @@ func Flags(obj interface{}, keys ...string) {
 		case reflect.String:
 			flag.String(path, tag.Value, tag.Description)
 		case reflect.Slice, reflect.Array:
-			// set as string type
+			// TODO 使用flag.Var设置变量
 			flag.String(path, tag.Value, tag.Description)
 		default:
-			log.Fatalf("unsupport type %s for set flag", fv.Type())
+			log.Printf("unknow type %s for set flag", fv.Type())
 		}
 	})
 	t.Travel(obj)
-
-	// 1. 遍历所有变量
-	// 2. 如果keys没有设置，则默认是将所有的变量都加入到flags中
-	// 3. 如果指定了具体的变量名称，则只加入指定的变量到flags中
-	// 4. 在读取配置文件之后，添加完默认配置之后，应用命令行中的配置
 }
 
+// ApplyFlags 将命令行中设置的变量值应用到`obj`中。
+//
+// **注意：** configo中的函数默认会调用这个函数设置配置文件，所以不需要显示调用。
 func ApplyFlags(obj interface{}) {
 	actualFlags := make(map[string]*flag.Flag)
 	flag.Visit(func(f *flag.Flag) {
 		actualFlags[f.Name] = f
 	})
-	if len(actualFlags) == 0 {
+	if len(actualFlags) == 0 || flagMap == nil {
 		return
 	}
 	t := NewTravel(func(path string, tag *toml.CfgTag, fv reflect.Value) {
@@ -142,15 +186,17 @@ func ApplyFlags(obj interface{}) {
 		case reflect.String:
 			fv.SetString(f.Value.String())
 		case reflect.Slice, reflect.Array:
-			// FIXME TODO
+			// TODO NOT support
 			/*
-				v := rv.Addr().Interface()
-				if err := unmarshalArray(ft.Name, f.Value.String(), v); err != nil {
-					return err
+				if err := unmarshalArray("name", f.Value.String(), &s); err != nil {
+					log.Fatalln(err)
+					return
 				}
+				fv.Set(reflect.ValueOf(s.Name))
+				log.Printf("get list =%#v\n", s)
 			*/
 		default:
-			log.Fatalf("unsupport type %s for set flag", fv.Type())
+			log.Printf("unknow type %s for set flag", fv.Type())
 		}
 	})
 	t.Travel(obj)

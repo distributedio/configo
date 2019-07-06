@@ -13,7 +13,7 @@ import (
 func main() {
 	c := &conf.Config{}
 
-	configo.Flags(c, "listen", "redis", "redis.0.cluster")
+	configo.AddFlags(c, "listen", "redis", "redis.0.cluster")
 	flag.Parse()
 
 	data, err := ioutil.ReadFile("conf/example.toml")
