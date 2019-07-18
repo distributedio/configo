@@ -5,6 +5,7 @@ import (
 	"github.com/shafreeck/toml"
 	"github.com/shafreeck/toml/ast"
 
+	"flag"
 	"fmt"
 	goast "go/ast"
 	"reflect"
@@ -274,7 +275,7 @@ func Unmarshal(data []byte, v interface{}) error {
 	}
 
 	// apply flag param
-	ApplyFlags(v)
+	ApplyFlags(flag.CommandLine, v)
 	return nil
 }
 

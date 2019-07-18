@@ -5,6 +5,7 @@ import (
 	"log"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/shafreeck/toml"
@@ -59,14 +60,16 @@ import (
 		./cmd -array="[\"a1\", \"a2\"]"
 */
 
-var flagMap map[string]struct{} = nil
+const (
+	ConfigoFlagSuffix = "[configo]"
+)
 
 // AddFlags 将对象中的变量加入到flag中，从而可以通过命令行设置对应的变量。
 //
 // * `obj`  为待加入到`flag`中的对象的实例
 // * `keys` 限定加入`flag`中变量的范围，**不设置**的时候表示将所有变量都加入到`flag`中。
-func AddFlags(obj interface{}, keys ...string) {
-	flagMap = make(map[string]struct{}, len(keys))
+func AddFlags(fs *flag.FlagSet, obj interface{}, keys ...string) {
+	flagMap := make(map[string]struct{}, len(keys))
 	for i := range keys {
 		flagMap[keys[i]] = struct{}{}
 	}
@@ -83,14 +86,14 @@ func AddFlags(obj interface{}, keys ...string) {
 				if fv.Kind() == reflect.Int64 {
 					//try to parse a time.Duration
 					if d, err := time.ParseDuration(tag.Value); err == nil {
-						flag.Duration(path, time.Duration(d), tag.Description)
+						fs.Duration(path, time.Duration(d), tag.Description+ConfigoFlagSuffix)
 						return
 					}
 				}
 				log.Fatalln(err)
 				return
 			}
-			flag.Int64(path, v, tag.Description)
+			fs.Int64(path, v, tag.Description+ConfigoFlagSuffix)
 		case reflect.Uint, reflect.Uint8, reflect.Uint16,
 			reflect.Uint32, reflect.Uint64:
 			var v uint64
@@ -98,26 +101,26 @@ func AddFlags(obj interface{}, keys ...string) {
 				log.Fatalln(err)
 				return
 			}
-			flag.Uint64(path, v, tag.Description)
+			fs.Uint64(path, v, tag.Description+ConfigoFlagSuffix)
 		case reflect.Float32, reflect.Float64:
 			var v float64
 			if v, err = strconv.ParseFloat(tag.Value, 64); err != nil {
 				log.Fatalln(err)
 				return
 			}
-			flag.Float64(path, v, tag.Description)
+			fs.Float64(path, v, tag.Description+ConfigoFlagSuffix)
 		case reflect.Bool:
 			var v bool
 			if v, err = strconv.ParseBool(tag.Value); err != nil {
 				log.Fatalln(err)
 				return
 			}
-			flag.Bool(path, v, tag.Description)
+			fs.Bool(path, v, tag.Description+ConfigoFlagSuffix)
 		case reflect.String:
-			flag.String(path, tag.Value, tag.Description)
+			fs.String(path, tag.Value, tag.Description+ConfigoFlagSuffix)
 		case reflect.Slice, reflect.Array:
 			// TODO 使用flag.Var设置变量
-			flag.String(path, tag.Value, tag.Description)
+			fs.String(path, tag.Value, tag.Description+ConfigoFlagSuffix)
 		default:
 			log.Printf("unknow type %s for set flag", fv.Type())
 		}
@@ -128,20 +131,16 @@ func AddFlags(obj interface{}, keys ...string) {
 // ApplyFlags 将命令行中设置的变量值应用到`obj`中。
 //
 // **注意：** configo中的函数默认会调用这个函数设置配置文件，所以不需要显示调用。
-func ApplyFlags(obj interface{}) {
+func ApplyFlags(fs *flag.FlagSet, obj interface{}) {
 	actualFlags := make(map[string]*flag.Flag)
-	flag.Visit(func(f *flag.Flag) {
-		actualFlags[f.Name] = f
+	fs.Visit(func(f *flag.Flag) {
+		if strings.Contains(f.Usage, ConfigoFlagSuffix) {
+			actualFlags[f.Name] = f
+		}
 	})
-	if len(actualFlags) == 0 || flagMap == nil {
-		return
-	}
 	t := NewTravel(func(path string, tag *toml.CfgTag, fv reflect.Value) {
 		f, ok := actualFlags[path]
 		if !ok {
-			return
-		}
-		if _, ok := flagMap[path]; len(flagMap) > 0 && !ok {
 			return
 		}
 		var err error
@@ -187,14 +186,12 @@ func ApplyFlags(obj interface{}) {
 			fv.SetString(f.Value.String())
 		case reflect.Slice, reflect.Array:
 			// TODO NOT support
-			/*
-				if err := unmarshalArray("name", f.Value.String(), &s); err != nil {
-					log.Fatalln(err)
-					return
-				}
-				fv.Set(reflect.ValueOf(s.Name))
-				log.Printf("get list =%#v\n", s)
-			*/
+			//	if err := unmarshalArray("name", f.Value.String(), &s); err != nil {
+			//		log.Fatalln(err)
+			//		return
+			//	}
+			//	fv.Set(reflect.ValueOf(s.Name))
+			//	log.Printf("get list =%#v\n", s)
 		default:
 			log.Printf("unknow type %s for set flag", fv.Type())
 		}
