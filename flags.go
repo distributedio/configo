@@ -86,14 +86,14 @@ func AddFlags(fs *flag.FlagSet, obj interface{}, keys ...string) {
 				if fv.Kind() == reflect.Int64 {
 					//try to parse a time.Duration
 					if d, err := time.ParseDuration(tag.Value); err == nil {
-						fs.Duration(path, time.Duration(d), tag.Description+ConfigoFlagSuffix)
+						fs.Duration(path, time.Duration(d), ConfigoFlagSuffix+tag.Description)
 						return
 					}
 				}
 				log.Fatalln(err)
 				return
 			}
-			fs.Int64(path, v, tag.Description+ConfigoFlagSuffix)
+			fs.Int64(path, v, ConfigoFlagSuffix+tag.Description)
 		case reflect.Uint, reflect.Uint8, reflect.Uint16,
 			reflect.Uint32, reflect.Uint64:
 			var v uint64
@@ -101,26 +101,26 @@ func AddFlags(fs *flag.FlagSet, obj interface{}, keys ...string) {
 				log.Fatalln(err)
 				return
 			}
-			fs.Uint64(path, v, tag.Description+ConfigoFlagSuffix)
+			fs.Uint64(path, v, ConfigoFlagSuffix+tag.Description)
 		case reflect.Float32, reflect.Float64:
 			var v float64
 			if v, err = strconv.ParseFloat(tag.Value, 64); err != nil {
 				log.Fatalln(err)
 				return
 			}
-			fs.Float64(path, v, tag.Description+ConfigoFlagSuffix)
+			fs.Float64(path, v, ConfigoFlagSuffix+tag.Description)
 		case reflect.Bool:
 			var v bool
 			if v, err = strconv.ParseBool(tag.Value); err != nil {
 				log.Fatalln(err)
 				return
 			}
-			fs.Bool(path, v, tag.Description+ConfigoFlagSuffix)
+			fs.Bool(path, v, ConfigoFlagSuffix+tag.Description)
 		case reflect.String:
-			fs.String(path, tag.Value, tag.Description+ConfigoFlagSuffix)
+			fs.String(path, tag.Value, ConfigoFlagSuffix+tag.Description)
 		case reflect.Slice, reflect.Array:
 			// TODO 使用flag.Var设置变量
-			fs.String(path, tag.Value, tag.Description+ConfigoFlagSuffix)
+			fs.String(path, tag.Value, ConfigoFlagSuffix+tag.Description)
 		default:
 			log.Printf("unknow type %s for set flag", fv.Type())
 		}
