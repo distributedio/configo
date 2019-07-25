@@ -10,6 +10,9 @@ Configo is a go library to parse toml configuration using struct tags
 
 ## QuickStart
 
+* Install `configo-build` tool for config generation
+> go get github.com/distributedio/configo/bin/configo-build
+
 * Define a struct in package conf
 ```go
 package conf
@@ -23,53 +26,32 @@ type Config struct {
 }
 ```
 
-* Build the configuration file generator
+* Use `configo-build` tool generate config builder, if everything goes well, you'll get a binary called `conf.Config.cfg`
 
-### First, install configo-build
-```sh
-go get github.com/distributedio/configo/bin/configo-build
-```
+> configo-build ./conf.Config
 
-* Then, build an executable program basing on your package and struct
-```sh
-configo-build ./conf.Config
-```
 or use the absolute path
-```sh
-configo-build github.com/distributedio/configo/example/conf.Config
-```
 
-* Finally, use the built program to generate a toml
-```
-conf.config.cfg > conf.toml
-```
-and you can patch you toml file if it is already existed
-```
-conf.config.cfg -patch conf.toml
-```
+> configo-build github.com/distributedio/configo/example/conf.Config
 
-Output
+* execute builer to generate a toml
+> conf.config.cfg > conf.toml
 
-```toml
-#type:        string
-#rules:       netaddr
-#description: The address the server to listen
-#default:     :8804
-#listen = ":8804"
+or patch you toml file if it is already existed
 
-#type:        int
-#rules:       numeric
-#description: Max number of concurrent connections
-#default:     10000
-#max-connection = 10000
+> conf.config.cfg -patch conf.toml
 
-[redis]
+* Use your config in your code
 
-#type:        []string
-#rules:       dialstring
-#description: The addresses of redis cluster
-#required
-cluster = []
+```go
+import "github.com/distributedio/configo"
+
+var conf conf.Config
+
+if err := configo.Parse("{PATH_TO_YOUR_TOML}", &conf) ;err != nil {
+// handle the error
+}
+
 ```
 
 ## Toml
