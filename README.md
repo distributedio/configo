@@ -61,6 +61,8 @@ adding the abililty to parse complex struct tags and with bugs fixed.
 ## Validation
 configo has a builtin validator with regex and range support
 
+___Supported named validator___
+
 * netaddr
 * url
 * nonempty
@@ -70,7 +72,7 @@ configo has a builtin validator with regex and range support
 * printableascii
 * path
 
-and you can also use compare operator in tags
+and you can also use compare operator and regExp in tags
 
 ```go
 > 1 //greater than 1
@@ -89,7 +91,7 @@ netaddr //named validator, used to validate a network address
 numeric  >10 ( ,100)// mix different expressions, 'and' is used to combine all expressions
 ```
 
-See the [source code](https://github.com/distributedio/configo/blob/master/rule/named.go#L12) for all valid "named validators"
+See the [Suppoted Vaildator](https://github.com/distributedio/configo/blob/master/rule/named.go#L12) for all valid "named validators"
 
 ## Struct tags
 
