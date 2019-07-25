@@ -15,6 +15,17 @@ adding the abililty to parse complex struct tags and with bugs fixed.
 ## Validation
 configo has a builtin validator with regex and range support
 
+* netaddr
+* url
+* nonempty
+* dialstring
+* boolean
+* numeric
+* printableascii
+* path
+
+and you can also use compare operator in tags
+
 ```go
 > 1 //greater than 1
 >=1 //greater than or equal to 1
