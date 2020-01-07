@@ -21,7 +21,7 @@ import(
 	"io/ioutil"
 	"os"
 
-	"github.com/shafreeck/configo"
+	"github.com/distributedio/configo"
 
 	"%s" // the config package
 )
