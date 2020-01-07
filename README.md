@@ -8,12 +8,71 @@ Configo is a go library to parse toml configuration using struct tags
 * Generating toml template with human friendly information based on go struct and tags
 * Building conf file generation tools using configo-build
 
+## QuickStart
+
+* Install `configo-build` tool for config generation
+> go get github.com/distributedio/configo/bin/configo-build
+
+* Define a struct in package conf
+```go
+package conf
+
+type Config struct {
+        Listen  string `cfg:"listen; :8804; netaddr; The address the server to listen"`
+        MaxConn int    `cfg:"max-connection; 10000; numeric; Max number of concurrent connections"`
+        Redis   struct {
+                Cluster []string `cfg:"cluster; required; dialstring; The addresses of redis cluster"`
+        }
+}
+```
+
+* Use `configo-build` tool generate config builder, if everything goes well, you'll get a binary called `conf.Config.cfg`
+
+> configo-build ./conf.Config
+
+or use the absolute path
+
+> configo-build github.com/distributedio/configo/example/conf.Config
+
+* execute builer to generate a toml
+> conf.config.cfg > conf.toml
+
+or patch you toml file if it is already existed
+
+> conf.config.cfg -patch conf.toml
+
+* Use your config in your code
+
+```go
+import "github.com/distributedio/configo"
+
+var conf conf.Config
+
+if err := configo.Parse("{PATH_TO_YOUR_TOML}", &conf) ;err != nil {
+// handle the error
+}
+
+```
+
 ## Toml
 [shafreeck/toml](https://github.com/shafreeck/toml) is a modification version of [naoina/toml](https://github.com/naoina/toml),
 adding the abililty to parse complex struct tags and with bugs fixed.
 
 ## Validation
 configo has a builtin validator with regex and range support
+
+___Supported named validator___
+
+* netaddr
+* url
+* nonempty
+* dialstring
+* boolean
+* numeric
+* printableascii
+* path
+
+and you can also use compare operator and regExp in tags
 
 ```go
 > 1 //greater than 1
@@ -32,7 +91,7 @@ netaddr //named validator, used to validate a network address
 numeric  >10 ( ,100)// mix different expressions, 'and' is used to combine all expressions
 ```
 
-See the [source code](https://github.com/distributedio/configo/blob/master/rule/named.go#L12) for all valid "named validators"
+See the [Suppoted Vaildator](https://github.com/distributedio/configo/blob/master/rule/named.go#L12) for all valid "named validators"
 
 ## Struct tags
 
@@ -76,65 +135,3 @@ conf.config.cfg > conf.toml #generating
 conf.config.cfg -patch conf.toml #updating if conf.toml has already existed
 ```
 
-## Example
-
-### Define a struct in package conf
-```go
-package conf
-
-type Config struct {
-        Listen  string `cfg:"listen; :8804; netaddr; The address the server to listen"`
-        MaxConn int    `cfg:"max-connection; 10000; numeric; Max number of concurrent connections"`
-        Redis   struct {
-                Cluster []string `cfg:"cluster; required; dialstring; The addresses of redis cluster"`
-        }
-}
-```
-
-## Build the configuration file generator
-
-### First, install configo-build
-```sh
-go get github.com/distributedio/configo/bin/configo-build
-```
-
-### Then, build an executable program basing on your package and struct
-```sh
-configo-build ./conf.Config
-```
-or use the absolute path
-```sh
-configo-build github.com/distributedio/configo/example/conf.Config
-```
-### Finally, use the built program to generate a toml
-```
-conf.config.cfg > conf.toml
-```
-and you can patch you toml file if it is already existed
-```
-conf.config.cfg -patch conf.toml
-```
-
-Output
-
-```toml
-#type:        string
-#rules:       netaddr
-#description: The address the server to listen
-#default:     :8804
-#listen = ":8804"
-
-#type:        int
-#rules:       numeric
-#description: Max number of concurrent connections
-#default:     10000
-#max-connection = 10000
-
-[redis]
-
-#type:        []string
-#rules:       dialstring
-#description: The addresses of redis cluster
-#required
-cluster = []
-```
